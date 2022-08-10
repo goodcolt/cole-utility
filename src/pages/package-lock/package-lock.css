@@ -1,3 +1,11 @@
 .packagelock {
   padding: 1em;
 }
+
+.requiredPackages {
+  list-style-type: "🇷  ";
+}
+
+.dependencies {
+  list-style-type: "🇩  ";
+}

@@ -159,7 +159,7 @@ const renderDepenencyList = (dependencies : IDependency[]) => {
   }
 
   return (
-    <ul>
+    <ul className="dependencies">
     {dependencies.map(dependency => {
       return (
       <>
@@ -181,7 +181,7 @@ const renderRequireList = (requiredPackages : IPackage[]) => {
   }
 
   return (
-    <ul>
+    <ul className="requiredPackages">
     {requiredPackages.map(requiredPackage => {
       return (
       <>
