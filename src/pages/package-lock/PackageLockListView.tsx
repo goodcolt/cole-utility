@@ -122,9 +122,12 @@ const filterDependencies = (dependencies : IDependency[], dependencyName : strin
 
     // Match found
     if (dependency.name === dependencyName || hasItem(requiredPackagesSet) && requiredPackagesSet.has(dependency.name)) {
-      filteredDependency.requireList = dependency.requireList.filter(r => requiredPackagesSet.has(r.name))
-
-      filteredDependencyList.push(filteredDependency);
+      if(hasItem(requiredPackagesSet)){
+        filteredDependency.requireList = dependency.requireList.filter(r => requiredPackagesSet.has(r.name))
+      }
+      
+      filteredDependency.dependencyList = filterDependencies(dependency.dependencyList, dependencyName, requiredPackagesSet);
+      filteredDependencyList.push(filteredDependency); 
       return;
     }
 
@@ -153,7 +156,24 @@ const filterDependencies = (dependencies : IDependency[], dependencyName : strin
   return filteredDependencyList;
 }
 
-const renderDepenencyList = (dependencies : IDependency[]) => {   
+const getDependencySuggestions = (dependencies : IDependency[], filterName : string) : Set<string> => { 
+  let topLevelPackagesSet : Set<string> = new Set<string>();
+  const requiredByMap : Map<string, Set<string>> = setRequiredByMap(dependencies);
+
+  if (!hasItem(requiredByMap) || !hasData(filterName)) {
+    return topLevelPackagesSet;
+  }
+
+  dependencies.forEach(dependency => {
+    topLevelPackagesSet.add(dependency.name);
+  })
+
+  // TODO - Reduce set to unique ones not part of other packages
+
+  return topLevelPackagesSet;
+}
+
+const renderDepenencyList = (dependencies : IDependency[], dependencySuggestions : Set<string>, dependencyName : string ) => {   
   if (!hasItem(dependencies)) {
     return;
   }
@@ -161,13 +181,15 @@ const renderDepenencyList = (dependencies : IDependency[]) => {
   return (
     <ul className="dependencies">
     {dependencies.map(dependency => {
+      let isSuggestedPackage : boolean = hasItem(dependencySuggestions) && dependencySuggestions.has(dependency.name);
+      
       return (
       <>
-        <li>
+        <li className={isSuggestedPackage ? 'suggested' : ''}>
           {dependency.name} : {dependency.version}
         </li>
-        {renderDepenencyList(dependency.dependencyList as IDependency[])}
-        {renderRequireList(dependency.requireList as IPackage[])}
+        {renderDepenencyList(dependency.dependencyList, dependencySuggestions, dependencyName)}
+        {renderRequireList(dependency.requireList as IPackage[], dependencyName)}
       </>
       )
     })}
@@ -175,7 +197,7 @@ const renderDepenencyList = (dependencies : IDependency[]) => {
   );
 }
 
-const renderRequireList = (requiredPackages : IPackage[]) => {   
+const renderRequireList = (requiredPackages : IPackage[], dependencyName : string) => {   
   if (!hasItem(requiredPackages)) {
     return;
   }
@@ -183,9 +205,11 @@ const renderRequireList = (requiredPackages : IPackage[]) => {
   return (
     <ul className="requiredPackages">
     {requiredPackages.map(requiredPackage => {
+      
+      
       return (
       <>
-        <li>
+        <li className={requiredPackage.name === dependencyName ? 'filteredPackage' : ''}>
           {requiredPackage.name} : {requiredPackage.version}
         </li>
       </>
@@ -198,12 +222,12 @@ const renderRequireList = (requiredPackages : IPackage[]) => {
 const PackageLockListView = (props : Props) => {
  // TODO: this is double rendering. Find out why
  
-  const filteredDependencyList = getFilteredDepenencyList(props?.dependencyList as IDependency[], props?.filterName as string);
-
+  const filteredDependencyList : IDependency[] = getFilteredDepenencyList(props?.dependencyList as IDependency[], props?.filterName as string);
+  const dependencySuggestions : Set<string> = getDependencySuggestions(filteredDependencyList, props?.filterName as string);
 
   return (
-  <div>
-    {renderDepenencyList(filteredDependencyList as IDependency[])}
+  <div className='packagelock-results'>
+    {renderDepenencyList(filteredDependencyList, dependencySuggestions, props?.filterName as string)}
   </div>
   )
  }

@@ -2,7 +2,7 @@ import { ChangeEvent, useState } from 'react'
 import { readJsonFile, selectJsonFile } from '../../lib/fileHelper';
 import PackageLockListView from './PackageLockListView';
 import './package-lock.css'
-import { event } from '@tauri-apps/api';
+
 const parseLockFile = (lockFileJson: any): IPackageLock => {
   let packageLock: IPackageLock = {
     projectName: '',
@@ -111,11 +111,12 @@ const PackageLock = () => {
         <br />
         <input onChange={handleSearchChange} />
       </div>
-      <PackageLockListView
-        dependencyList={packageLock?.dependencyList}
-        filterName={packageName}
-      />
-
+      <div >
+        <PackageLockListView
+          dependencyList={packageLock?.dependencyList}
+          filterName={packageName}
+        />
+      </div>
     </div>
   )
 }

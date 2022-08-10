@@ -1,11 +1,24 @@
+.dependencies {
+  list-style-type: "🇩  ";
+}
+
 .packagelock {
-  padding: 1em;
+  padding: 0.5em;
+}
+
+.packagelock-results {
+  display: flex;
+  justify-content:flex-start
 }
 
 .requiredPackages {
   list-style-type: "🇷  ";
 }
 
-.dependencies {
-  list-style-type: "🇩  ";
+.suggested {
+  color:plum;
+}
+
+.filteredPackage {
+  color:steelblue;
 }
