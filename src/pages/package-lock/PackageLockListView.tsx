@@ -5,7 +5,7 @@ interface Props {
   filterName?: string;
 }
 
-const getFilteredDepenencyList = (dependencies : IDependency[], dependencyName : string) => {   
+const getFilteredDepenencyList = (dependencies: IDependency[], dependencyName: string) => {
   // No filter or dependencies provided
   if (!hasData(dependencyName)) {
     return dependencies;
@@ -18,9 +18,9 @@ const getFilteredDepenencyList = (dependencies : IDependency[], dependencyName :
   return filterDependencies(dependencies, dependencyName, requiredPackagesSet)
 }
 
-const getRequiredPackagesSet = (dependencies : IDependency[], dependencyName : string) : Set<string> => { 
-  let requiredPackagesSet : Set<string> = new Set<string>();
-  const requiredByMap : Map<string, Set<string>> = setRequiredByMap(dependencies);
+const getRequiredPackagesSet = (dependencies: IDependency[], dependencyName: string): Set<string> => {
+  const requiredByMap: Map<string, Set<string>> = setRequiredByMap(dependencies);
+  let requiredPackagesSet: Set<string> = new Set<string>();
 
   if (!hasItem(requiredByMap)) {
     return requiredPackagesSet;
@@ -40,11 +40,11 @@ const getRequiredPackagesSet = (dependencies : IDependency[], dependencyName : s
 }
 
 const getTotalRequiredPackagesSet = (
-  requiredByMap : Map<string, Set<string>>, 
-  requiredPackagesSet : Set<string> = new Set<string>(), 
-  totalRequiredPackagesSet : Set<string> = new Set<string>()
-  ) => { 
- 
+  requiredByMap: Map<string, Set<string>>,
+  requiredPackagesSet: Set<string> = new Set<string>(),
+  totalRequiredPackagesSet: Set<string> = new Set<string>()
+) => {
+
   if (!hasItem(requiredPackagesSet)) {
     return totalRequiredPackagesSet;
   }
@@ -53,8 +53,8 @@ const getTotalRequiredPackagesSet = (
     if (!totalRequiredPackagesSet.has(requiredPackage)) {
       totalRequiredPackagesSet.add(requiredPackage);
     }
-    
-    const nestedSet : Set<string> = requiredByMap.get(requiredPackage) as Set<string>;
+
+    const nestedSet: Set<string> = requiredByMap.get(requiredPackage) as Set<string>;
 
     if (!hasItem(nestedSet)) {
       return;
@@ -66,31 +66,31 @@ const getTotalRequiredPackagesSet = (
   return totalRequiredPackagesSet;
 }
 
-const setRequiredByMap = (dependencies : IDependency[], requiredByMap = new Map<string, Set<string>>() ) : Map<string, Set<string>> => { 
+const setRequiredByMap = (dependencies: IDependency[], requiredByMap = new Map<string, Set<string>>()): Map<string, Set<string>> => {
   if (!hasItem(dependencies)) {
     return requiredByMap;
   }
 
-  dependencies.forEach(dependency => { 
+  dependencies.forEach(dependency => {
     // Update required by packages map
     if (hasData(dependency.name) && hasItem(dependency.requireList)) {
-      
+
       dependency.requireList.forEach(requiredPackage => {
         if (!requiredPackage.name) {
           return;
         }
-        
+
         if (!requiredByMap.has(requiredPackage.name)) {
-          const requiredSet = new Set<string>(); 
+          const requiredSet = new Set<string>();
           requiredSet.add(dependency.name as string);
           requiredByMap.set(requiredPackage.name, requiredSet)
           return;
         }
 
-        requiredByMap.get(requiredPackage.name)?.add(dependency.name as string); 
+        requiredByMap.get(requiredPackage.name)?.add(dependency.name as string);
       })
     }
-    
+
     // No more dependencies to check 
     if (!hasItem(dependency?.dependencyList)) {
       return;
@@ -99,19 +99,19 @@ const setRequiredByMap = (dependencies : IDependency[], requiredByMap = new Map<
     // Check nested dependencies
     setRequiredByMap(dependency.dependencyList, requiredByMap);
   })
-  
+
   return requiredByMap;
 }
 
-const filterDependencies = (dependencies : IDependency[], dependencyName : string, requiredPackagesSet : Set<string>) : IDependency[] => { 
-  let filteredDependencyList : IDependency[] = []; 
+const filterDependencies = (dependencies: IDependency[], dependencyName: string, requiredPackagesSet: Set<string>): IDependency[] => {
+  const filteredDependencyList: IDependency[] = [];
 
   if (!hasItem(dependencies)) {
     return [];
   }
 
   dependencies.forEach(dependency => {
-    let filteredDependency : IDependency;
+    let filteredDependency: IDependency;
 
     filteredDependency = {
       name: dependency.name,
@@ -122,12 +122,12 @@ const filterDependencies = (dependencies : IDependency[], dependencyName : strin
 
     // Match found
     if (dependency.name === dependencyName || hasItem(requiredPackagesSet) && requiredPackagesSet.has(dependency.name)) {
-      if(hasItem(requiredPackagesSet)){
+      if (hasItem(requiredPackagesSet)) {
         filteredDependency.requireList = dependency.requireList.filter(r => requiredPackagesSet.has(r.name))
       }
-      
+
       filteredDependency.dependencyList = filterDependencies(dependency.dependencyList, dependencyName, requiredPackagesSet);
-      filteredDependencyList.push(filteredDependency); 
+      filteredDependencyList.push(filteredDependency);
       return;
     }
 
@@ -152,83 +152,79 @@ const filterDependencies = (dependencies : IDependency[], dependencyName : strin
 
     filteredDependencyList.push(filteredDependency);
   })
-  
+
   return filteredDependencyList;
 }
 
-const getDependencySuggestions = (dependencies : IDependency[], filterName : string) : Set<string> => { 
-  let topLevelPackagesSet : Set<string> = new Set<string>();
-  const requiredByMap : Map<string, Set<string>> = setRequiredByMap(dependencies);
+const getDependencySuggestions = (dependencies: IDependency[]): Set<string> => {
+  const requiredByMap: Map<string, Set<string>> = setRequiredByMap(dependencies);
+  const dependencySuggestionSet: Set<string> = new Set<string>();
 
-  if (!hasItem(requiredByMap) || !hasData(filterName)) {
-    return topLevelPackagesSet;
+  if (!hasItem(requiredByMap)) {
+    return dependencySuggestionSet;
   }
 
   dependencies.forEach(dependency => {
-    topLevelPackagesSet.add(dependency.name);
+    if (!requiredByMap.has(dependency.name)) {
+      dependencySuggestionSet.add(dependency.name);
+    }
   })
 
-  // TODO - Reduce set to unique ones not part of other packages
-
-  return topLevelPackagesSet;
+  return dependencySuggestionSet;
 }
 
-const renderDepenencyList = (dependencies : IDependency[], dependencySuggestions : Set<string>, dependencyName : string ) => {   
+const renderDepenencyList = (dependencies: IDependency[], dependencySuggestions: Set<string>, dependencyName: string) => {
   if (!hasItem(dependencies)) {
     return;
   }
 
   return (
     <ul className="dependencies">
-    {dependencies.map(dependency => {
-      let isSuggestedPackage : boolean = hasItem(dependencySuggestions) && dependencySuggestions.has(dependency.name);
-      
-      return (
-      <>
-        <li className={isSuggestedPackage ? 'suggested' : ''}>
-          {dependency.name} : {dependency.version}
-        </li>
-        {renderDepenencyList(dependency.dependencyList, dependencySuggestions, dependencyName)}
-        {renderRequireList(dependency.requireList as IPackage[], dependencyName)}
-      </>
-      )
-    })}
-  </ul>
+      {dependencies.map(dependency => {
+        let isSuggestedPackage: boolean = hasItem(dependencySuggestions) && dependencySuggestions.has(dependency.name);
+
+        return (
+          <>
+            <li className={isSuggestedPackage ? 'suggested' : ''}>
+              {dependency.name} : {dependency.version}
+            </li>
+            {renderDepenencyList(dependency.dependencyList, dependencySuggestions, dependencyName)}
+            {renderRequireList(dependency.requireList as IPackage[], dependencyName)}
+          </>
+        )
+      })}
+    </ul>
   );
 }
 
-const renderRequireList = (requiredPackages : IPackage[], dependencyName : string) => {   
+const renderRequireList = (requiredPackages: IPackage[], dependencyName: string) => {
   if (!hasItem(requiredPackages)) {
     return;
   }
 
   return (
     <ul className="requiredPackages">
-    {requiredPackages.map(requiredPackage => {
-      
-      
-      return (
-      <>
-        <li className={requiredPackage.name === dependencyName ? 'filteredPackage' : ''}>
-          {requiredPackage.name} : {requiredPackage.version}
-        </li>
-      </>
-      )
-    })}
-  </ul>
+      {requiredPackages.map(requiredPackage => {
+
+        return (         
+            <li className={requiredPackage.name === dependencyName ? 'filteredPackage' : ''}>
+              {requiredPackage.name} : {requiredPackage.version}
+            </li>
+        )
+      })}
+    </ul>
   );
 }
 
-const PackageLockListView = (props : Props) => {
- // TODO: this is double rendering. Find out why
- 
-  const filteredDependencyList : IDependency[] = getFilteredDepenencyList(props?.dependencyList as IDependency[], props?.filterName as string);
-  const dependencySuggestions : Set<string> = getDependencySuggestions(filteredDependencyList, props?.filterName as string);
+const PackageLockListView = (props: Props) => {
+  // TODO: this is double rendering. Find out why
+  const filteredDependencyList: IDependency[] = getFilteredDepenencyList(props?.dependencyList as IDependency[], props?.filterName as string);
+  const dependencySuggestions: Set<string> = getDependencySuggestions(filteredDependencyList);
 
   return (
-  <div className='packagelock-results'>
-    {renderDepenencyList(filteredDependencyList, dependencySuggestions, props?.filterName as string)}
-  </div>
+    <div className='packagelock-results'>
+      {renderDepenencyList(filteredDependencyList, dependencySuggestions, props?.filterName as string)}
+    </div>
   )
- }
+}
 export default PackageLockListView

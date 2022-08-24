@@ -1,11 +1,14 @@
-export function hasItem (value: Array<any> | Map<any, any> | Set<any> | undefined | null): boolean {
+declare type anyString = string | undefined | null;
+declare type anyCollection = Array<any> | Map<any, any> | Set<any> | undefined | null;
+
+export function hasItem(value: anyCollection): boolean {
   if (Array.isArray(value)) {
-    return !!value && value.length > 0
+    return value.length > 0
   }
 
   return !!value && value.size > 0;
 };
 
-export function hasData (value: string | undefined | null): boolean {
+export function hasData(value: anyString): boolean {
   return !!value && value.trim() !== '';
 };
