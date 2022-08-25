@@ -12,3 +12,7 @@ export function hasItem(value: anyCollection): boolean {
 export function hasData(value: anyString): boolean {
   return !!value && value.trim() !== '';
 };
+
+export function isTauri(): boolean {
+  return !!window.__TAURI__;
+};

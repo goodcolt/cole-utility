@@ -1,13 +1,19 @@
 import { ChangeEvent, useState } from 'react'
-import { readJsonFile, selectJsonFile } from '../../lib/fileHelper';
+import FileUploader from '../../components/file-uploader/FileUploader';
 import PackageLockListView from './PackageLockListView';
+import { hasItem } from '../../lib/validation';
 import './package-lock.css'
+import Input from '../../components/input/Input';
 
 const parseLockFile = (lockFileJson: any): IPackageLock => {
   let packageLock: IPackageLock = {
     projectName: '',
     dependencyList: []
   };
+
+  if (!lockFileJson) {
+    return packageLock;
+  }
 
   if (lockFileJson.hasOwnProperty('name')) {
     packageLock.projectName = lockFileJson.name;
@@ -54,8 +60,15 @@ const parseRequires = (requiresJson: any): IPackage[] => {
   let requireList: IPackage[] = [];
   let requirePackage: IPackage;
 
+  if (!requiresJson) {
+    return requireList;
+  }
+
   const requirekeys: string[] = Object.keys(requiresJson);
-  if (requirekeys.length < 1) { return requireList; }
+
+  if (!hasItem(requirekeys)) {
+    return requireList;
+  }
 
   for (let key of requirekeys) {
     requirePackage = {
@@ -70,53 +83,38 @@ const parseRequires = (requiresJson: any): IPackage[] => {
 }
 
 const PackageLock = () => {
-  const [filePath, setFilePath] = useState<string>();
   const [packageLock, setPackageLock] = useState<IPackageLock>();
   const [packageName, setPackageName] = useState<string>();
 
-  const openPackageLockFile = async () => {
-    const selectedFile = await selectJsonFile();
-
+  const handleFileChange = (jsonFile: any) => {
     // No file selected
-    if (selectedFile === null) {
+    if (!jsonFile) {
       return;
     }
 
     // TODO - make sure a package lock is selected first
 
     // Read and parse lock file
-    const jsonFile = await readJsonFile(selectedFile);
     const lockFile: IPackageLock = parseLockFile(jsonFile)
 
-    setFilePath(selectedFile);
     setPackageLock(lockFile);
   }
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-
     setPackageName(event.target.value)
   }
 
-  // TODO - This is ugly code... Organize this and stop being lazy with your CSS
   return (
     <div className={'packagelock'}>
-      <button onClick={() => openPackageLockFile()}> Open File </button>
-      <div>
-        <h3>
-          Package Lock: {filePath}
-        </h3>
-      </div>
-      <div>
-        Search Package:
-        <br />
-        <input onChange={handleSearchChange} />
-      </div>
-      <div >
-        <PackageLockListView
-          dependencyList={packageLock?.dependencyList}
-          filterName={packageName}
-        />
-      </div>
+      <FileUploader onFileChange={handleFileChange} />
+      <Input
+        label={'Filter Package:'}
+        onChange={handleSearchChange}
+      />
+      <PackageLockListView
+        dependencyList={packageLock?.dependencyList}
+        filterName={packageName}
+      />
     </div>
   )
 }

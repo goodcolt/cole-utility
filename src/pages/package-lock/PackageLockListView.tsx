@@ -206,10 +206,10 @@ const renderRequireList = (requiredPackages: IPackage[], dependencyName: string)
     <ul className="requiredPackages">
       {requiredPackages.map(requiredPackage => {
 
-        return (         
-            <li className={requiredPackage.name === dependencyName ? 'filteredPackage' : ''}>
-              {requiredPackage.name} : {requiredPackage.version}
-            </li>
+        return (
+          <li className={requiredPackage.name === dependencyName ? 'filteredPackage' : ''}>
+            {requiredPackage.name} : {requiredPackage.version}
+          </li>
         )
       })}
     </ul>
