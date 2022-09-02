@@ -1,4 +1,5 @@
 # Cole Utility Tool
+You can run this tool in the browser or build it for a desktop app with Tauri.
 
 ## How to Use
 
@@ -16,26 +17,29 @@ Currently this is the only tool added. This tool helps you search for nested dep
          - If you are looking to update a package this is often the one to look into first.
      - ![Package Lock Example](/public/package-lock-filter-example.png)
 
-## How to Run
-You can run this tool in the browser or build it for a desktop app with Tauri.
+## Run Locally: Web Browser
 
-#### Web Browser
+To install UI packages, run ```npm install```.
 
-##### Run Locally:
 To start it up, run ```npm run dev```. This will build in development mode and start a server listening at ```localhost:5173```.
 
-#### Desktop App
+## Run Locally: Desktop App
 Tauri is used to build the desktop application version. This is a Rust based framework. 
 
-##### Prerequisites:
-You need to have Microsoft Visual Studio C++ Build Tools, WebView2 (Included in Windows 11), and Rust installed on you machine.
+#### Prerequisites:
+You need to have the following installed on you machine.
+1. Microsoft Visual Studio C++ Build Tools
+2. WebView2 (Included in Windows 11)
+3. Rust 
 
 https://tauri.app/v1/guides/getting-started/prerequisites
 
-##### Run Locally:
+#### Run Locally:
+To install UI packages, run ```npm install```.
+
 To start it up, run ```npm run tauri dev```. This will build in development mode. The first time you run it will take longer as it needs to install rust packages similar to the npm install step.
 
-##### Build for desktop install:
+## Build for Desktop App Install
 You are able to build the application to install as a small desktop application. Then you can simply open the application rather than run it in development each time.
 
 To create a build, run ```npm run tauri build```. It will build your Frontend, compile the Rust binary, collect all external binaries and resources, and finally produce neat platform-specific bundles and installers.
